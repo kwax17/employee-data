@@ -27,7 +27,7 @@ function init() {
         } else if (data.question == "Add An Employee") {
           addEmployees();
         } else if (data.question == "Update An Employee") {
-          // function
+          updateEmployee();
         };
         // return data;
       });
@@ -214,6 +214,10 @@ function addEmployees() {
     });
   }); 
 };
+
+function updateEmployee() {
+  
+}
 
 module.exports = {
   init
