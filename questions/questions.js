@@ -1,15 +1,9 @@
 const inquirer = require('inquirer');
 
-const questions = [];
-
-function init(data) {
-    if (!data) {
-      data = [];
-    }
+function init() {
     return inquirer
-      .prompt(questions)
-      .then(answers => {
-        data.push(answers);
+      .prompt("What do you want to do?")
+      .then(data => {
         return data;
       });
 }
