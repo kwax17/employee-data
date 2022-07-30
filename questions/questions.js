@@ -23,7 +23,7 @@ function init() {
         } else if (data.question == "Add A Department") {
           addDepartments();
         } else if (data.question == "Add A Role") {
-          // function
+          addRoles();
         } else if (data.question == "Add An Employee") {
           // function
         } else if (data.question == "Update An Employee") {
@@ -84,7 +84,7 @@ function addDepartments() {
 
       db.query(command, {name: answer.newDept}, function(err, res){
         if (err) throw err;
-        console.table(res);
+        // console.table(res);
         init();
       });
     });
@@ -92,28 +92,104 @@ function addDepartments() {
 };
 
 function addRoles() {
-  const command = "SELECT roles.title AS roles, roles.salary, department.dept_name FROM roles INNER JOIN department ON department.id = roles.department_id;";
-  db.query(command, (err, res) => {
+  const commandA = "SELECT roles.title AS roles, roles.salary, department.name FROM roles INNER JOIN department ON department.id = roles.department_id;";
+  const commandB = "SELECT department.name FROM department" ;
+  db.query(commandA, (err, res) => {
     if (err) throw err;
     console.table(res);
-    const addPrompt = [
-      {
-        type: "input",
-        name: "newDept",
-        message: "New Department Name:"
-      }
-    ];
-    inquirer.prompt(addPrompt)
-    .then(answer => {
-      console.log(answer);
+    const departmentData = res
+    db.query(commandB, (err, res) => {
+      if (err) throw err;
+        // prompt
+        const addPrompt = [
+          {
+            type: "input",
+            name: "newRole",
+            message: "New Role Title:"
+          },
+          {
+            type: "input",
+            name: "newRoleSalary",
+            message: "New Role Salary:"
+          },
+          {
+            type: "list",
+            name: "newRoleDept",
+            message: "New Role Department:",
+            choices: function() {
+              departments = [];
+              for(i = 0; i < departmentData.length; i++) { 
+                const roleId = i + 1;
+                departments.push(roleId + ": " + departmentData[i].name);
+              };
+              return departments;
+            }
+          }
+        ];
+        // ask prompt
+        inquirer.prompt(addPrompt)
+        .then(answer => {
+          console.log(answer);
 
-      const command = "INSERT INTO department SET ?";
+          const command = "INSERT INTO roles SET ?";
 
-      db.query(command, {name: answer.newDept}, function(err, res){
-        if (err) throw err;
-        console.table(res);
-        init();
-      });
+          db.query(command, {title: answer.newRole, salary: answer.newRoleSalary, department_id: parseInt(answer.newRoleDept.split(":")[0])}, function(err, res){
+            if (err) throw err;
+            // console.table(res);
+            init();
+          });
+        });
+    });
+  }); 
+};
+
+function addEmployees() {
+  const commandA = "SELECT title FROM employees"
+  db.query(commandA, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    const departmentData = res
+    db.query(commandB, (err, res) => {
+      if (err) throw err;
+        // prompt
+        const addPrompt = [
+          {
+            type: "input",
+            name: "newRole",
+            message: "New Role Title:"
+          },
+          {
+            type: "input",
+            name: "newRoleSalary",
+            message: "New Role Salary:"
+          },
+          {
+            type: "list",
+            name: "newRoleDept",
+            message: "New Role Department:",
+            choices: function() {
+              departments = [];
+              for(i = 0; i < departmentData.length; i++) { 
+                const roleId = i + 1;
+                departments.push(roleId + ": " + departmentData[i].name);
+              };
+              return departments;
+            }
+          }
+        ];
+        // ask prompt
+        inquirer.prompt(addPrompt)
+        .then(answer => {
+          console.log(answer);
+
+          const command = "INSERT INTO roles SET ?";
+
+          db.query(command, {title: answer.newRole, salary: answer.newRoleSalary, department_id: parseInt(answer.newRoleDept.split(":")[0])}, function(err, res){
+            if (err) throw err;
+            // console.table(res);
+            init();
+          });
+        });
     });
   }); 
 };
