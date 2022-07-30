@@ -1,6 +1,8 @@
 const express = require('express');
 const inquirer = require('inquirer');
 const db = require('./db/connection');
+const apiRoutes = require('./routes/apiRoutes');
+const questions = require('./questions');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -11,6 +13,7 @@ app.use(express.json());
 
 // use api routes
 app.use('/api', apiRoutes);
+app.use(questions);
 
 // Default response for any other request (Not Found) // SHOULD BE LAST
 app.use((req, res) => {
