@@ -25,7 +25,7 @@ function init() {
         } else if (data.question == "Add A Role") {
           addRoles();
         } else if (data.question == "Add An Employee") {
-          // function
+          addEmployees();
         } else if (data.question == "Update An Employee") {
           // function
         };
@@ -52,8 +52,7 @@ function viewRoles() {
 };
 
 function viewEmployees() {
-  const command = "SELECT employees.first_name, employees.last_name, roles.title, roles.salary, department.name AS department, employees.manager_id" +
-  "FROM employees " +
+  const command = "SELECT employees.first_name, employees.last_name, roles.title, roles.salary, department.name AS department, employees.manager_id FROM employees " +
   "JOIN roles ON roles.id = employees.role_id " +
   "JOIN department ON roles.department_id = department.id " +
   "ORDER BY employees.id;";
@@ -97,9 +96,9 @@ function addRoles() {
   db.query(commandA, (err, res) => {
     if (err) throw err;
     console.table(res);
-    const departmentData = res
     db.query(commandB, (err, res) => {
       if (err) throw err;
+      const departmentData = res
         // prompt
         const addPrompt = [
           {
@@ -144,49 +143,71 @@ function addRoles() {
 };
 
 function addEmployees() {
-  const commandA = "SELECT title FROM employees"
-  db.query(commandA, (err, res) => {
+  const commandA  =
+  "SELECT employees.first_name, employees.last_name, roles.title, roles.salary, department.name, employees.manager_id " +
+  "FROM employees " +
+  "JOIN roles ON roles.id = employees.role_id " +
+  "JOIN department ON roles.department_id = department.id " +
+  "ORDER BY employees.id;";
+  const commandB = "SELECT title FROM roles";
+
+  db.query(commandB, (err, res) => {
     if (err) throw err;
-    console.table(res);
-    const departmentData = res
-    db.query(commandB, (err, res) => {
+    const rolesData = res
+
+    db.query(commandA, (err, res) => {
       if (err) throw err;
+      console.table(res);
+      const managersData = res
         // prompt
         const addPrompt = [
           {
             type: "input",
-            name: "newRole",
-            message: "New Role Title:"
+            name: "newFirst",
+            message: "First Name:"
           },
           {
             type: "input",
-            name: "newRoleSalary",
-            message: "New Role Salary:"
+            name: "newLast",
+            message: "Last Name"
           },
           {
             type: "list",
-            name: "newRoleDept",
-            message: "New Role Department:",
+            name: "newRole",
+            message: "Role:",
             choices: function() {
-              departments = [];
-              for(i = 0; i < departmentData.length; i++) { 
+              roles = [];
+              for(i = 0; i < rolesData.length; i++) { 
                 const roleId = i + 1;
-                departments.push(roleId + ": " + departmentData[i].name);
+                roles.push(roleId + ": " + rolesData[i].title);
               };
-              return departments;
+              return roles;
+            }
+          },
+          {
+            type: "list",
+            name: "newManager",
+            message: "Manager:",
+            choices: function() {
+              managers = [];
+              for(i = 0; i < managersData.length; i++) { 
+                const roleId = i + 1;
+                managers.push(roleId + ": " + managersData[i].last_name);
+              };
+              return managers;
             }
           }
         ];
-        // ask prompt
+        //inquierer
         inquirer.prompt(addPrompt)
         .then(answer => {
           console.log(answer);
 
-          const command = "INSERT INTO roles SET ?";
+          const command = "INSERT INTO employees SET ?";
 
-          db.query(command, {title: answer.newRole, salary: answer.newRoleSalary, department_id: parseInt(answer.newRoleDept.split(":")[0])}, function(err, res){
+          db.query(command, {first_name: answer.newFirst, last_name: answer.newLast, role_id: parseInt(answer.newRole.split(":")[0]), manager_id: parseInt(answer.newManager.split(":")[0])}, function(err, res){
             if (err) throw err;
-            // console.table(res);
+            console.table(res);
             init();
           });
         });
