@@ -216,7 +216,87 @@ function addEmployees() {
 };
 
 function updateEmployee() {
-  
+  const commandA  =
+  "SELECT employees.first_name, employees.last_name, roles.title, roles.salary, department.name, employees.manager_id " +
+  "FROM employees " +
+  "JOIN roles ON roles.id = employees.role_id " +
+  "JOIN department ON roles.department_id = department.id " +
+  "ORDER BY employees.id;";
+  const commandB = "SELECT title FROM roles";
+
+  db.query(commandB, (err, res) => {
+    if (err) throw err;
+    const rolesData = res
+
+    db.query(commandA, (err, res) => {
+      if (err) throw err;
+      console.table(res);
+      const employeesData = res
+      const managersData = res
+      
+      // prompt
+      const addPrompt = [
+        {
+          type: "list",
+          name: "editEmp",
+          message: "Select Employee:",
+          choices: function() {
+            employees = [];
+            for(i = 0; i < employeesData.length; i++) { 
+              const roleId = i + 1;
+              employees.push(roleId + ": " + employeesData[i].first_name + " " + employeesData[i].last_name);
+            };
+            return employees;
+          }
+        }
+      ];
+      inquirer.prompt(addPrompt)
+      .then(answer => {
+        const selectedEmp = answer.editEmp.split(":")[0]
+        const editPrompt = [
+          {
+            type: "list",
+            name: "editRole",
+            message: "New Role:",
+            choices: function() {
+              roles = [];
+              for(i = 0; i < rolesData.length; i++) { 
+                const roleId = i + 1;
+                roles.push(roleId + ": " + rolesData[i].title);
+              };
+              return roles;
+            }
+          },
+          {
+            type: "list",
+            name: "editManager",
+            message: "New Manager:",
+            choices: function() {
+              managers = [];
+              for(i = 0; i < managersData.length; i++) { 
+                const roleId = i + 1;
+                managers.push(roleId + ": " + managersData[i].last_name);
+              };
+              return managers;
+            }
+          }
+        ];
+        inquirer.prompt(editPrompt)
+        .then(answer => {
+          console.log(answer);
+          const command = "UPDATE employees SET ? WHERE employees.id = " + selectedEmp;
+          db.query(command, {
+            role_id: parseInt(answer.editRole.split(":")[0]),
+            manager_id: parseInt(answer.editManager.split(":")[0])
+          }, function(err, res) {
+            if (err) throw err;
+            console.table(res);
+            init();
+          })
+        })
+      })
+    })
+  })
 }
 
 module.exports = {

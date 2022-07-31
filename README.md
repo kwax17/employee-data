@@ -10,7 +10,8 @@ The original tables were created through MYSQL. They are housed on a database na
 JavaScript, Node,js, Inquirer.js, MYSQL, Express.js
 
 ## Usage
-![Video showing functionality]()
+![Video showing functionality](./assets/chall-12.mov)
+Youtube Link: https://youtu.be/Oml0-1v-MK0
 
 ## Questions
 Email: kelwacker@gmail.com
